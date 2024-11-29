@@ -1,0 +1,27 @@
+# Import necessary libraries
+import pandas as pd
+from mlxtend.frequent_patterns import apriori
+from mlxtend.frequent_patterns import association_rules
+
+# Load dataset (assuming a CSV format with sales data)
+data = pd.read_csv('sales_data.csv')
+
+# Data preprocessing
+# Convert items into a one-hot encoded format
+basket = data.pivot_table(index='TransactionID', columns='Item', aggfunc='size', fill_value=0)
+
+# Applying the Apriori Algorithm
+# Set minimum support threshold (e.g., 0.05 or 5%)
+frequent_itemsets = apriori(basket, min_support=0.05, use_colnames=True)
+
+# Generate association rules
+rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1.0)
+
+# Filter rules for high confidence and lift
+filtered_rules = rules[(rules['confidence'] >= 0.7) & (rules['lift'] >= 1.5)]
+
+# Display rules
+print(filtered_rules)
+
+# Save results to a CSV for analysis
+filtered_rules.to_csv('association_rules.csv', index=False)
